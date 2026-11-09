@@ -80,65 +80,200 @@
     </section>
 
     <section class="contact contact--page" id="suite">
-      <div class="container contact__grid">
-        <div class="contact__intro">
-          <p class="eyebrow" data-reveal>Votre projet</p>
-          <h2 class="heading" data-split-lines>Racontez-nous tout</h2>
-          <p class="body contact__lead" data-reveal>Votre lieu, votre date, le nombre de vos invités et les moments que vous imaginez : nous revenons vers vous avec une première proposition pensée pour votre week-end.</p>
+      <div class="container">
+        <div class="contact__top">
+          <div>
+            <p class="eyebrow" data-reveal>Votre projet</p>
+            <h2 class="heading" data-split-lines>Racontez-nous tout</h2>
+            <p class="body contact__lead" data-reveal>Quelques informations suffisent pour que nous imaginions une première proposition. Votre sélection se récapitule au fil de la saisie et sera jointe automatiquement à votre demande.</p>
+          </div>
           <ul class="contact__info" data-reveal>
             <li><span>Téléphone</span><a href="tel:+33400000000" class="link">04 00 00 00 00</a></li>
             <li><span>E-mail</span><a href="mailto:contact@cookevents.fr" class="link">contact@cookevents.fr</a></li>
             <li><span>Maison</span>Cook Events · Provence</li>
           </ul>
-          <ol class="process" data-reveal>
-            <li><span>I</span><div><strong>Vous nous écrivez</strong><p>Quelques mots sur votre projet suffisent pour commencer.</p></div></li>
-            <li><span>II</span><div><strong>Nous imaginons</strong><p>Une proposition composée pour votre lieu, votre date et vos envies.</p></div></li>
-            <li><span>III</span><div><strong>Nous affinons ensemble</strong><p>Menus, scènes culinaires, rythme du week-end : chaque détail prend sa place.</p></div></li>
-            <li><span>IV</span><div><strong>Vous profitez</strong><p>Le jour venu, notre brigade s'occupe de tout.</p></div></li>
-          </ol>
         </div>
 
-        <form class="form form--light" data-form novalidate>
-          <p class="form__prefill" data-form-prefill hidden></p>
-          <div class="field">
-            <input id="f-name" name="name" type="text" placeholder=" " autocomplete="name" required />
-            <label for="f-name">Vos prénoms</label>
+        <form class="request form--light" data-form novalidate>
+          <div class="request__main">
+
+            <div class="request__step" role="group" aria-labelledby="s-maries">
+              <h3 class="request__legend" id="s-maries"><span>I</span>Les mariés</h3>
+              <div class="field field--half">
+                <input id="f-name1" name="name1" type="text" placeholder=" " autocomplete="name" required />
+                <label for="f-name1">Prénom &amp; nom · marié(e)</label>
+              </div>
+              <div class="field field--half">
+                <input id="f-tel1" name="tel1" type="tel" placeholder=" " autocomplete="tel" required />
+                <label for="f-tel1">Téléphone</label>
+              </div>
+              <div class="field field--half">
+                <input id="f-name2" name="name2" type="text" placeholder=" " />
+                <label for="f-name2">Prénom &amp; nom · marié(e)</label>
+              </div>
+              <div class="field field--half">
+                <input id="f-tel2" name="tel2" type="tel" placeholder=" " />
+                <label for="f-tel2">Téléphone</label>
+              </div>
+              <div class="field">
+                <input id="f-email" name="email" type="email" placeholder=" " autocomplete="email" required />
+                <label for="f-email">E-mail</label>
+              </div>
+            </div>
+
+            <div class="request__step" role="group" aria-labelledby="s-mariage">
+              <h3 class="request__legend" id="s-mariage"><span>II</span>Le mariage</h3>
+              <div class="field field--half">
+                <select id="f-year" name="year">
+                  <option value="2026">2026</option>
+                  <option value="2027" selected>2027</option>
+                  <option value="2028">2028</option>
+                  <option value="2029">2029</option>
+                </select>
+                <label for="f-year" class="is-fixed">Année du mariage</label>
+              </div>
+              <div class="field field--half">
+                <input id="f-town" name="town" type="text" placeholder=" " />
+                <label for="f-town">Commune</label>
+              </div>
+              <div class="field">
+                <input id="f-place" name="place" type="text" placeholder=" " />
+                <label for="f-place">Domaine ou lieu de réception</label>
+              </div>
+            </div>
+
+            <div class="request__step request__step--moments" role="group" aria-labelledby="s-moments">
+              <h3 class="request__legend" id="s-moments"><span>III</span>Les moments &amp; formules</h3>
+              <p class="request__hint">Cochez les moments souhaités, leur date et la formule qui vous attire. Rien n'est figé : nous affinerons ensemble.</p>
+
+              <div class="moment-pick" data-moment="wd">
+                <label class="moment-pick__toggle"><input type="checkbox" name="m_wd" value="1" /><span><b>Welcome dinner</b><small>La veille</small></span></label>
+                <div class="moment-pick__body">
+                  <div class="field field--date">
+                    <input id="f-date-wd" name="date_wd" type="date" />
+                    <label for="f-date-wd" class="is-fixed">Date du welcome dinner</label>
+                  </div>
+                  <div class="choice">
+                    <label><input type="radio" name="wd" value="casa" /><span><b>Casa</b><small>dès 39 €</small></span></label>
+                    <label><input type="radio" name="wd" value="braise" /><span><b>Braise</b><small>dès 69 €</small></span></label>
+                    <label><input type="radio" name="wd" value="alfresco" /><span><b>Al Fresco</b><small>dès 85 €</small></span></label>
+                    <label><input type="radio" name="wd" value="" checked /><span><b>À définir</b><small>ensemble</small></span></label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="moment-pick" data-moment="jj">
+                <label class="moment-pick__toggle"><input type="checkbox" name="m_jj" value="1" checked /><span><b>Jour J</b><small>Cocktail &amp; dîner</small></span></label>
+                <div class="moment-pick__body">
+                  <div class="field field--date">
+                    <input id="f-date-jj" name="date_jj" type="date" />
+                    <label for="f-date-jj" class="is-fixed">Date du mariage</label>
+                  </div>
+                  <div class="choice">
+                    <label><input type="radio" name="jj" value="flamme" /><span><b>Flamme &amp; Élégance</b><small>dès 130 €</small></span></label>
+                    <label><input type="radio" name="jj" value="signature" /><span><b>Signature du domaine</b><small>dès 145 €</small></span></label>
+                    <label><input type="radio" name="jj" value="" checked /><span><b>À définir</b><small>ensemble</small></span></label>
+                  </div>
+                  <p class="request__sub">Créations signature du dîner</p>
+                  <div class="choice choice--small" data-options>
+                    <label><input type="checkbox" name="opt" value="entree" /><span><b>Entrée signature</b><small>+6 €</small></span></label>
+                    <label><input type="checkbox" name="opt" value="plat" /><span><b>Plat signature</b><small>+15 €</small></span></label>
+                    <label><input type="checkbox" name="opt" value="dessert" /><span><b>Dessert signature</b><small>+15 €</small></span></label>
+                  </div>
+                </div>
+              </div>
+
+              <div class="moment-pick" data-moment="br">
+                <label class="moment-pick__toggle"><input type="checkbox" name="m_br" value="1" /><span><b>Brunch du lendemain</b><small>Time to brunch · dès 32 €</small></span></label>
+                <div class="moment-pick__body">
+                  <div class="field field--date">
+                    <input id="f-date-br" name="date_br" type="date" />
+                    <label for="f-date-br" class="is-fixed">Date du brunch</label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="request__step" role="group" aria-labelledby="s-invites">
+              <h3 class="request__legend" id="s-invites"><span>IV</span>Vos invités</h3>
+              <div class="field field--half field--count">
+                <label for="f-adults" class="is-fixed">Adultes</label>
+                <div class="counter">
+                  <button type="button" data-step="-10" aria-label="Retirer 10 adultes">−</button>
+                  <input id="f-adults" name="adults" type="number" min="0" max="999" step="1" value="120" inputmode="numeric" />
+                  <button type="button" data-step="10" aria-label="Ajouter 10 adultes">+</button>
+                </div>
+              </div>
+              <div class="field field--half field--count">
+                <label for="f-kids" class="is-fixed">Enfants</label>
+                <div class="counter">
+                  <button type="button" data-step="-1" aria-label="Retirer un enfant">−</button>
+                  <input id="f-kids" name="kids" type="number" min="0" max="999" step="1" value="0" inputmode="numeric" />
+                  <button type="button" data-step="1" aria-label="Ajouter un enfant">+</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="request__step" role="group" aria-labelledby="s-autour">
+              <h3 class="request__legend" id="s-autour"><span>V</span>Autour de vous</h3>
+              <p class="request__sub request__sub--first">Prestataires déjà présents</p>
+              <div class="choice choice--small">
+                <label><input type="checkbox" name="vendors" value="Wedding planner" /><span><b>Wedding planner</b></span></label>
+                <label><input type="checkbox" name="vendors" value="Fleuriste / décoration" /><span><b>Fleuriste / décoration</b></span></label>
+                <label><input type="checkbox" name="vendors" value="Photographe / vidéaste" /><span><b>Photographe / vidéaste</b></span></label>
+                <label><input type="checkbox" name="vendors" value="DJ / musiciens" /><span><b>DJ / musiciens</b></span></label>
+                <label><input type="checkbox" name="vendors" value="Bar / mixologie" /><span><b>Bar / mixologie</b></span></label>
+                <label><input type="checkbox" name="vendors" value="Pâtissier / pièce montée" /><span><b>Pâtissier / pièce montée</b></span></label>
+                <label><input type="checkbox" name="vendors" value="Location de mobilier" /><span><b>Location de mobilier</b></span></label>
+                <label><input type="checkbox" name="vendors" value="Traiteur pour un autre moment" /><span><b>Autre traiteur</b></span></label>
+              </div>
+              <div class="field">
+                <input id="f-vendors-more" name="vendors_more" type="text" placeholder=" " />
+                <label for="f-vendors-more">Leurs noms ou précisions (facultatif)</label>
+              </div>
+              <div class="field">
+                <select id="f-budget" name="budget">
+                  <option value="">Je préfère en parler ensemble</option>
+                  <option>Moins de 10 000 €</option>
+                  <option>10 000 € à 20 000 €</option>
+                  <option>20 000 € à 35 000 €</option>
+                  <option>35 000 € à 50 000 €</option>
+                  <option>Plus de 50 000 €</option>
+                </select>
+                <label for="f-budget" class="is-fixed">Budget envisagé pour la restauration</label>
+              </div>
+            </div>
+
+            <div class="request__step" role="group" aria-labelledby="s-message">
+              <h3 class="request__legend" id="s-message"><span>VI</span>Votre message</h3>
+              <div class="field">
+                <textarea id="f-msg" name="message" rows="5" placeholder=" "></textarea>
+                <label for="f-msg">Votre histoire, vos envies, vos questions…</label>
+              </div>
+            </div>
           </div>
-          <div class="field">
-            <input id="f-email" name="email" type="email" placeholder=" " autocomplete="email" required />
-            <label for="f-email">E-mail</label>
-          </div>
-          <div class="field field--half">
-            <input id="f-phone" name="phone" type="tel" placeholder=" " autocomplete="tel" />
-            <label for="f-phone">Téléphone</label>
-          </div>
-          <div class="field field--half">
-            <input id="f-date" name="date" type="date" placeholder=" " />
-            <label for="f-date" class="is-fixed">Date du mariage</label>
-          </div>
-          <div class="field">
-            <input id="f-place" name="place" type="text" placeholder=" " />
-            <label for="f-place">Lieu de réception</label>
-          </div>
-          <div class="field field--range">
-            <label for="f-guests" class="is-fixed">Nombre de convives : <output data-guests-out>120</output></label>
-            <input id="f-guests" name="guests" type="range" min="50" max="400" step="10" value="120" />
-          </div>
-          <fieldset class="field field--choices">
-            <legend>Moments souhaités</legend>
-            <label><input type="checkbox" name="moments" value="Welcome dinner" /> <span>Welcome dinner</span></label>
-            <label><input type="checkbox" name="moments" value="Jour J" checked /> <span>Jour J</span></label>
-            <label><input type="checkbox" name="moments" value="Brunch du lendemain" /> <span>Brunch</span></label>
-          </fieldset>
-          <div class="field">
-            <textarea id="f-msg" name="message" rows="4" placeholder=" "></textarea>
-            <label for="f-msg">Votre projet en quelques mots</label>
-          </div>
-          <div class="form__foot">
-            <button type="submit" class="btn" data-magnetic><span class="btn__label">Envoyer ma demande</span></button>
-            <p class="form__note" data-form-note role="status">Votre messagerie s'ouvrira avec votre demande pré-remplie.</p>
-          </div>
+
+          <aside class="recap" aria-live="polite">
+            <p class="eyebrow">Votre demande</p>
+            <h3 class="recap__title">Récapitulatif</h3>
+            <dl class="recap__list" data-recap></dl>
+            <div class="recap__total" data-recap-total hidden>
+              <small>Estimation à partir de</small>
+              <span data-recap-amount>0</span> €
+              <em data-recap-pp></em>
+            </div>
+            <p class="recap__note">Estimation indicative fondée sur les prix « à partir de » de la Collection 2027, appliqués à l'ensemble des convives. Votre proposition est établie sur-mesure.</p>
+            <button type="submit" class="btn btn--light" data-magnetic><span class="btn__label">Envoyer ma demande</span></button>
+            <p class="form__note" data-form-note role="status">Votre messagerie s'ouvrira avec votre demande et ce récapitulatif pré-remplis.</p>
+          </aside>
         </form>
+
+        <ol class="process process--row" data-reveal>
+          <li><span>I</span><div><strong>Vous nous écrivez</strong><p>Votre demande et votre sélection nous parviennent ensemble.</p></div></li>
+          <li><span>II</span><div><strong>Nous imaginons</strong><p>Une proposition composée pour votre lieu, votre date et vos envies.</p></div></li>
+          <li><span>III</span><div><strong>Nous affinons ensemble</strong><p>Menus, scènes culinaires, rythme du week-end : chaque détail prend sa place.</p></div></li>
+          <li><span>IV</span><div><strong>Vous profitez</strong><p>Le jour venu, notre brigade s'occupe de tout.</p></div></li>
+        </ol>
       </div>
     </section>
   </main>

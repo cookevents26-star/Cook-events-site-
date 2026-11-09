@@ -97,70 +97,187 @@
     });
   };
 
-  /* ---------- Formulaire de contact (avec pré-remplissage) ---------- */
+  /* ---------- Demande de proposition (contact) ---------- */
+  const PRICES = {
+    wd: { casa: 39, braise: 69, alfresco: 85 },
+    jj: { flamme: 130, signature: 145 },
+    opt: { entree: 6, plat: 15, dessert: 15 },
+    br: 32,
+  };
   const form = $('[data-form]');
   if (form) {
-    const range = $('#f-guests', form);
-    const out = $('[data-guests-out]', form);
-    const sync = () => { out.textContent = range.value + (range.value === range.max ? '+' : ''); };
-    range.addEventListener('input', sync);
+    const val = (name) => (form.elements[name] ? String(form.elements[name].value || '').trim() : '');
+    const checked = (name) => !!(form.elements[name] && form.elements[name].checked);
+    const radio = (name) => { const r = $(`input[name="${name}"]:checked`, form); return r ? r.value : ''; };
+    const frDate = (v) => {
+      if (!v) return '';
+      const [y, m, d] = v.split('-').map(Number);
+      return new Date(y, m - 1, d).toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    };
+    const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    const recapEl = $('[data-recap]', form);
+    const totalBox = $('[data-recap-total]', form);
+    const amountEl = $('[data-recap-amount]', form);
+    const ppEl = $('[data-recap-pp]', form);
+    const shownAmount = { v: 0 };
 
-    // Arrivée depuis une autre page (Choisir Casa, simulateur…) : on pré-remplit la demande.
-    const q = new URLSearchParams(window.location.search);
-    const wd = LABELS.wd[q.get('wd')];
-    const jj = LABELS.jj[q.get('jj')];
-    const br = q.get('br') === '1';
-    const opts = (q.get('opt') || '').split(',').map((o) => LABELS.opt[o]).filter(Boolean);
-    const guests = parseInt(q.get('g'), 10);
-    if (guests >= 50 && guests <= 400) range.value = guests;
-    if (wd || jj || br) {
-      const boxes = $$('input[name="moments"]', form);
-      boxes.forEach((b) => { b.checked = false; });
-      if (wd) boxes[0].checked = true;
-      if (jj) boxes[1].checked = true;
-      if (br) boxes[2].checked = true;
-      const parts = [];
-      if (wd) parts.push(`welcome dinner ${wd}`);
-      if (jj) parts.push(`jour J en formule ${jj}${opts.length ? ` (${opts.join(', ').toLowerCase()})` : ''}`);
-      if (br) parts.push('brunch du lendemain Time to brunch');
-      $('#f-msg', form).value = `Bonjour, nous aimerions recevoir une proposition pour : ${parts.join(', ')}.`;
-      const est = parseInt(q.get('est'), 10);
-      const prefill = $('[data-form-prefill]', form);
-      if (prefill) {
-        prefill.textContent = est
-          ? `Votre sélection : ${parts.join(' · ')} — estimation à partir de ${euro.format(est)} €.`
-          : `Votre sélection : ${parts.join(' · ')}.`;
-        prefill.hidden = false;
+    // Moments : ouvrir/fermer, et cocher le moment quand on choisit une formule
+    const moments = $$('.moment-pick', form);
+    const syncMoments = () => moments.forEach((m) => {
+      const on = $('.moment-pick__toggle input', m).checked;
+      m.classList.toggle('is-on', on);
+    });
+    moments.forEach((m) => {
+      $('.moment-pick__body', m).addEventListener('click', () => {
+        const t = $('.moment-pick__toggle input', m);
+        if (!t.checked) { t.checked = true; syncMoments(); compute(); }
+      });
+    });
+
+    // Année : bornes des dates
+    const syncYear = () => {
+      const y = val('year');
+      $$('input[type="date"]', form).forEach((d) => {
+        d.min = `${y}-01-01`; d.max = `${y}-12-31`;
+        if (d.value && !d.value.startsWith(y)) d.value = '';
+      });
+    };
+    // Le welcome dinner et le brunch se calent sur la date du jour J
+    const dateJJ = $('#f-date-jj', form);
+    dateJJ.addEventListener('change', () => {
+      if (!dateJJ.value) return;
+      const [y, m, d] = dateJJ.value.split('-').map(Number);
+      const shift = (n) => { const x = new Date(y, m - 1, d + n); return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`; };
+      const wdDate = $('#f-date-wd', form);
+      const brDate = $('#f-date-br', form);
+      if (!wdDate.value) wdDate.value = shift(-1);
+      if (!brDate.value) brDate.value = shift(1);
+    });
+
+    // Compteurs adultes / enfants
+    $$('.counter', form).forEach((c) => {
+      const input = $('input', c);
+      $$('button', c).forEach((b) => b.addEventListener('click', () => {
+        input.value = Math.max(0, Math.min(999, (parseInt(input.value, 10) || 0) + parseInt(b.dataset.step, 10)));
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+      }));
+    });
+
+    // Lecture de la sélection et récapitulatif
+    const read = () => {
+      const adults = Math.max(0, parseInt(val('adults'), 10) || 0);
+      const kids = Math.max(0, parseInt(val('kids'), 10) || 0);
+      const guests = adults + kids;
+      const items = [];
+      let pp = 0;
+      if (checked('m_wd')) {
+        const k = radio('wd');
+        if (k) pp += PRICES.wd[k];
+        items.push({ moment: 'Welcome dinner', date: frDate(val('date_wd')), formula: k ? LABELS.wd[k] : 'Formule à définir ensemble', price: k ? `dès ${PRICES.wd[k]} € / pers` : '' });
       }
-    }
-    sync();
+      if (checked('m_jj')) {
+        const k = radio('jj');
+        const opts = $$('input[name="opt"]:checked', form).map((o) => o.value);
+        if (k) pp += PRICES.jj[k];
+        opts.forEach((o) => { pp += PRICES.opt[o]; });
+        const extra = opts.length ? ` + ${opts.map((o) => LABELS.opt[o].toLowerCase()).join(', ')}` : '';
+        items.push({ moment: 'Jour J', date: frDate(val('date_jj')), formula: (k ? LABELS.jj[k] : 'Formule à définir ensemble') + extra, price: k ? `dès ${PRICES.jj[k] + opts.reduce((s, o) => s + PRICES.opt[o], 0)} € / pers` : '' });
+      }
+      if (checked('m_br')) {
+        pp += PRICES.br;
+        items.push({ moment: 'Lendemain', date: frDate(val('date_br')), formula: 'Time to brunch', price: `dès ${PRICES.br} € TTC / pers` });
+      }
+      return {
+        adults, kids, guests, items, pp, total: pp * guests,
+        vendors: $$('input[name="vendors"]:checked', form).map((v) => v.value),
+      };
+    };
+
+    const compute = () => {
+      const r = read();
+      const rows = [];
+      const couple = [val('name1'), val('name2')].filter(Boolean).join(' & ');
+      if (couple) rows.push(['Les mariés', esc(couple)]);
+      const where = [val('place'), val('town')].filter(Boolean).join(', ');
+      rows.push(['Le mariage', esc(`${val('year')}${where ? ` · ${where}` : ''}`)]);
+      r.items.forEach((it) => rows.push([it.moment, `<strong>${esc(it.formula)}</strong>${it.price ? `<small>${esc(it.price)}</small>` : ''}${it.date ? `<small>${esc(it.date)}</small>` : ''}`]));
+      if (!r.items.length) rows.push(['Moments', '<em>Aucun moment sélectionné</em>']);
+      rows.push(['Convives', `${r.adults} adulte${r.adults > 1 ? 's' : ''}${r.kids ? ` · ${r.kids} enfant${r.kids > 1 ? 's' : ''}` : ''}`]);
+      if (r.vendors.length) rows.push(['Prestataires', esc(r.vendors.join(', '))]);
+      if (val('budget')) rows.push(['Budget', esc(val('budget'))]);
+      recapEl.innerHTML = rows.map(([k, v]) => `<div><dt>${k}</dt><dd>${v}</dd></div>`).join('');
+
+      totalBox.hidden = !r.total;
+      ppEl.textContent = r.total ? `soit ${euro.format(r.pp)} € par convive` : '';
+      const paint = () => { amountEl.textContent = euro.format(Math.round(shownAmount.v)); };
+      if (hasGsap && !reduced) window.gsap.to(shownAmount, { v: r.total, duration: .8, ease: 'power3.out', overwrite: true, onUpdate: paint });
+      else { shownAmount.v = r.total; paint(); }
+      return r;
+    };
+
+    // Arrivée depuis une autre page (Choisir Casa, simulateur…) : la sélection est reprise.
+    const q = new URLSearchParams(window.location.search);
+    const setRadio = (name, value) => { const el = $(`input[name="${name}"][value="${value}"]`, form); if (el) el.checked = true; };
+    if (PRICES.wd[q.get('wd')]) { form.elements.m_wd.checked = true; setRadio('wd', q.get('wd')); }
+    if (PRICES.jj[q.get('jj')]) { form.elements.m_jj.checked = true; setRadio('jj', q.get('jj')); }
+    (q.get('opt') || '').split(',').forEach((o) => { if (PRICES.opt[o]) { form.elements.m_jj.checked = true; $(`input[name="opt"][value="${o}"]`, form).checked = true; } });
+    if (q.get('br') === '1') form.elements.m_br.checked = true;
+    const g = parseInt(q.get('g'), 10);
+    if (g > 0 && g < 1000) form.elements.adults.value = g;
+
+    syncYear();
+    syncMoments();
+    compute();
+    form.elements.year.addEventListener('change', syncYear);
+    form.addEventListener('input', () => { syncMoments(); compute(); });
+    form.addEventListener('change', () => { syncMoments(); compute(); });
 
     form.addEventListener('submit', (e) => {
       e.preventDefault();
+      const note = $('[data-form-note]', form);
       let ok = true;
-      ['#f-name', '#f-email'].forEach((sel) => {
-        const input = $(sel, form);
+      ['name1', 'tel1', 'email'].forEach((n) => {
+        const input = form.elements[n];
         const valid = input.value.trim() && input.checkValidity();
         input.closest('.field').classList.toggle('is-invalid', !valid);
         if (!valid) ok = false;
       });
-      const note = $('[data-form-note]', form);
-      if (!ok) { note.textContent = 'Merci de renseigner vos prénoms et un e-mail valide.'; return; }
-      const fd = new FormData(form);
-      const d = Object.fromEntries(fd);
+      const r = read();
+      if (!ok) { note.textContent = 'Merci d’indiquer au moins un prénom, un téléphone et un e-mail valide.'; form.querySelector('.is-invalid input')?.focus(); return; }
+      if (!r.items.length) { note.textContent = 'Merci de sélectionner au moins un moment (welcome dinner, jour J ou brunch).'; return; }
+      const line = (label, value) => (value ? `${label} : ${value}` : null);
       const body = [
-        `Prénoms : ${d.name}`,
-        `E-mail : ${d.email}`,
-        `Téléphone : ${d.phone || '—'}`,
-        `Date du mariage : ${d.date || 'à définir'}`,
-        `Lieu : ${d.place || 'à définir'}`,
-        `Convives : ${out.textContent}`,
-        `Moments souhaités : ${fd.getAll('moments').join(', ') || 'à définir'}`,
+        `DEMANDE DE PROPOSITION · MARIAGE ${val('year')}`,
         '',
-        d.message || '',
-      ].join('\n');
-      window.location.href = `mailto:contact@cookevents.fr?subject=${encodeURIComponent('Mariage — demande de proposition — ' + d.name)}&body=${encodeURIComponent(body)}`;
-      note.textContent = 'Merci ! Votre messagerie s’ouvre avec votre demande pré-remplie.';
+        'LES MARIÉS',
+        line('Marié(e)', `${val('name1')} · ${val('tel1')}`),
+        val('name2') || val('tel2') ? line('Marié(e)', `${val('name2') || '—'} · ${val('tel2') || '—'}`) : null,
+        line('E-mail', val('email')),
+        '',
+        'LE MARIAGE',
+        line('Année', val('year')),
+        line('Domaine / lieu', val('place') || 'à préciser'),
+        line('Commune', val('town')),
+        '',
+        'MOMENTS & FORMULES CHOISIS',
+        ...r.items.map((it) => `• ${it.moment} — ${it.formula}${it.price ? ` (${it.price})` : ''}${it.date ? ` — ${it.date}` : ' — date à préciser'}`),
+        r.total ? `Estimation indicative : à partir de ${euro.format(r.total)} € (${euro.format(r.pp)} € × ${r.guests} convives)` : null,
+        '',
+        'LES INVITÉS',
+        `Adultes : ${r.adults} · Enfants : ${r.kids}`,
+        '',
+        'AUTOUR DE NOUS',
+        line('Prestataires présents', r.vendors.join(', ') || 'aucun pour le moment'),
+        line('Précisions', val('vendors_more')),
+        line('Budget envisagé', val('budget') || 'à en parler ensemble'),
+        '',
+        'NOTRE MESSAGE',
+        val('message') || '—',
+      ].filter((l) => l !== null).join('\n');
+      const subject = `Mariage ${val('year')} — ${[val('name1'), val('name2')].filter(Boolean).join(' & ')}`;
+      form.lastRequest = { subject, body };
+      window.location.href = `mailto:contact@cookevents.fr?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      note.textContent = 'Merci ! Votre messagerie s’ouvre avec votre demande et le récapitulatif pré-remplis.';
     });
   }
 
