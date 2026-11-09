@@ -538,6 +538,11 @@
 
   gsap.set(heroChars, { yPercent: 110, rotate: 8, opacity: 0 });
   gsap.set('[data-hero-fade]', { y: 30, opacity: 0 });
+  // Welcome Dinner · Wedding Day · Brunch : chaque moment s'écrit à la plume, l'un après l'autre
+  const heroMoments = $$('.hero__moment');
+  const heroSeps = $$('.hero__moments-sep');
+  gsap.set(heroMoments, { clipPath: 'inset(-30% 100% -30% -10%)', opacity: 0, y: 8, filter: 'blur(6px)' });
+  gsap.set(heroSeps, { scale: 0, opacity: 0, rotate: -45 });
   if ($('.hero__media')) {
     gsap.set('.hero__media', { scale: 1.25 });
     gsap.set('.hero__media img', { scale: 1.08 });
@@ -550,6 +555,11 @@
     if (heroChars.length) tl.to(heroChars, { yPercent: 0, rotate: 0, opacity: 1, stagger: Math.min(.05, 1 / heroChars.length), duration: 1.4 }, .15);
     tl.to('[data-hero-fade]', { y: 0, opacity: 1, stagger: .14 }, .5)
       .to('.nav__inner', { y: 0, opacity: 1, duration: 1, clearProps: 'transform' }, .2);
+    heroMoments.forEach((m, i) => {
+      const at = 1.1 + i * .85;
+      tl.to(m, { clipPath: 'inset(-30% -10% -30% -10%)', opacity: 1, y: 0, filter: 'blur(0px)', duration: 1.5, ease: 'power2.inOut' }, at);
+      if (heroSeps[i]) tl.to(heroSeps[i], { scale: 1, opacity: 1, rotate: 45, duration: .9, ease: 'back.out(2)' }, at + .9);
+    });
     return tl;
   }
 

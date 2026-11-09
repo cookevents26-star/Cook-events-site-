@@ -1151,3 +1151,12 @@ a.step:hover .subheading { color: var(--sand); }
   .stat__unit { font-size: 9px; letter-spacing: .16em; }
   .stat dd { font-size: 14px; }
 }
+
+/* Hero : les trois moments du week-end */
+.hero__moments { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px clamp(18px, 2.6vw, 34px); margin: 20px 0 0; }
+.hero__moment { font-size: clamp(32px, 3.8vw, 52px); color: #fff; line-height: 1.25; padding: 0 .12em; will-change: clip-path, filter; }
+.hero__moments-sep { width: 7px; height: 7px; border: 1px solid rgba(255,255,255,.85); transform: rotate(45deg); flex: none; }
+@media (max-width: 560px) {
+  .hero__moments { flex-direction: column; gap: 2px; }
+  .hero__moments-sep { width: 5px; height: 5px; margin: 2px 0; }
+}
