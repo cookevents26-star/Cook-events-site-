@@ -1160,3 +1160,8 @@ a.step:hover .subheading { color: var(--sand); }
   .hero__moments { flex-direction: column; gap: 2px; }
   .hero__moments-sep { width: 5px; height: 5px; margin: 2px 0; }
 }
+
+/* Tuile « Imaginez votre mariage » */
+.tile__lead { margin: -2px 0 18px; font-style: italic; font-size: clamp(17px, 1.6vw, 21px); line-height: 1.4; color: rgba(255,255,255,.92); max-width: 34ch; }
+.tile--projet .tile__media img { object-position: 60% 40%; }
+.tile--projet::before { background: linear-gradient(180deg, rgba(36,34,31,.12) 0%, rgba(36,34,31,.34) 45%, rgba(36,34,31,.72) 100%); }
