@@ -24,6 +24,27 @@
     opt: { entree: 'Entrée signature', plat: 'Plat signature', dessert: 'Dessert signature' },
   };
 
+  /* ---------- Chaque page s'ouvre en haut ---------- */
+  // Le navigateur ne restaure plus l'ancienne position de défilement.
+  if ('scrollRestoration' in window.history) window.history.scrollRestoration = 'manual';
+  let userScrolled = false;
+  ['wheel', 'touchmove', 'keydown'].forEach((ev) => window.addEventListener(ev, () => { userScrolled = true; }, { once: true, passive: true }));
+  const toTop = () => {
+    if (userScrolled) return;
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+    window.__lenis?.scrollTo(0, { immediate: true, force: true });
+  };
+  toTop();
+  window.addEventListener('DOMContentLoaded', toTop);
+  window.addEventListener('load', toTop);
+  window.addEventListener('pageshow', toTop);
+  // Dans un cadre intégré (aperçu), on ramène aussi le cadre en haut de l'écran.
+  if (window.self !== window.top) {
+    try { document.documentElement.scrollIntoView({ block: 'start' }); } catch (e) { /* ignoré */ }
+  }
+
   /* ---------- Utilitaires sans GSAP ---------- */
   $$('[data-year]').forEach((el) => { el.textContent = new Date().getFullYear(); });
 
@@ -467,6 +488,7 @@
     lenis = new window.Lenis({ lerp: 0.09, smoothWheel: true });
     window.__lenis = lenis;
     lenis.on('scroll', ScrollTrigger.update);
+    lenis.scrollTo(0, { immediate: true, force: true });
     gsap.ticker.add((t) => lenis.raf(t * 1000));
     gsap.ticker.lagSmoothing(0);
   }
@@ -535,10 +557,7 @@
     document.body.classList.remove('is-loading');
     lenis?.start();
     ScrollTrigger.refresh();
-    if (window.location.hash.length > 1) {
-      const target = $(window.location.hash);
-      if (target) setTimeout(() => scrollToTarget(target), 150);
-    }
+    toTop();
   };
 
   /* ---------- Entrée : préchargeur (première visite) ou rideau ---------- */
