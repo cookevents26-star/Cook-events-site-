@@ -635,6 +635,29 @@
     });
   }
 
+  /* ---------- Garde-manger : la photo du produit suit le curseur ---------- */
+  const hoverList = $('[data-hover-list]');
+  const hoverFloat = $('.hover-float');
+  if (hoverList && hoverFloat && finePointer) {
+    const photo = $('img', hoverFloat);
+    const items = $$('li[data-img]', hoverList);
+    items.forEach((item) => { const pre = new Image(); pre.src = item.dataset.img; });
+    const fx = gsap.quickTo(hoverFloat, 'x', { duration: .7, ease: 'power3' });
+    const fy = gsap.quickTo(hoverFloat, 'y', { duration: .7, ease: 'power3' });
+    gsap.set(hoverFloat, { x: window.innerWidth / 2, y: window.innerHeight / 2 });
+    hoverList.addEventListener('mousemove', (e) => { fx(e.clientX + 170); fy(e.clientY); });
+    hoverList.addEventListener('mouseenter', () => hoverFloat.classList.add('is-visible'));
+    hoverList.addEventListener('mouseleave', () => hoverFloat.classList.remove('is-visible'));
+    items.forEach((item) => item.addEventListener('mouseenter', () => {
+      if (photo.getAttribute('src') === item.dataset.img) return;
+      photo.src = item.dataset.img;
+      gsap.fromTo(photo, { clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0% 0)', duration: .7, ease: 'expo.out' });
+    }));
+  }
+  if (hoverList) {
+    gsap.from($$('li', hoverList), { x: -60, opacity: 0, stagger: .07, scrollTrigger: { trigger: hoverList, start: 'top 82%' } });
+  }
+
   /* ---------- Manifeste : les mots s'allument ---------- */
   wordsManifesto.forEach(({ el, words }) => {
     ScrollTrigger.create({
