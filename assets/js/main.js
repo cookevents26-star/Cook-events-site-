@@ -107,17 +107,20 @@
       });
       const note = $('[data-form-note]', form);
       if (!ok) { note.textContent = 'Merci de renseigner vos prénoms et un e-mail valide.'; return; }
-      const d = Object.fromEntries(new FormData(form));
+      const fd = new FormData(form);
+      const d = Object.fromEntries(fd);
+      const moments = fd.getAll('moments').join(', ') || 'à définir';
       const body = [
         `Prénoms : ${d.name}`,
         `E-mail : ${d.email}`,
-        `Date : ${d.date || 'à définir'}`,
+        `Date du mariage : ${d.date || 'à définir'}`,
         `Lieu : ${d.place || 'à définir'}`,
-        `Invités : ${out.textContent}`,
+        `Convives : ${out.textContent}`,
+        `Moments souhaités : ${moments}`,
         '',
         d.message || '',
       ].join('\n');
-      window.location.href = `mailto:contact@cookevents.fr?subject=${encodeURIComponent('Demande de devis — ' + d.name)}&body=${encodeURIComponent(body)}`;
+      window.location.href = `mailto:contact@cookevents.fr?subject=${encodeURIComponent('Mariage — demande de proposition — ' + d.name)}&body=${encodeURIComponent(body)}`;
       note.textContent = 'Merci ! Votre messagerie s’ouvre avec votre demande pré-remplie.';
     });
   }
@@ -217,7 +220,8 @@
 
   gsap.set(heroChars, { yPercent: 110, rotate: 8, opacity: 0 });
   gsap.set('[data-hero-fade]', { y: 30, opacity: 0 });
-  gsap.set('.cloche', { y: 120, opacity: 0, scale: .9 });
+  gsap.set('.hero__media', { scale: 1.25 });
+  gsap.set('.hero__media img', { scale: 1.08 });
   gsap.set('.nav__inner', { y: -40, opacity: 0 });
 
   /* ---------- Préchargeur ---------- */
@@ -246,9 +250,9 @@
 
   function heroIntro() {
     return gsap.timeline()
-      .to(heroChars, { yPercent: 0, rotate: 0, opacity: 1, stagger: .022, duration: 1.3 })
-      .to('[data-hero-fade]', { y: 0, opacity: 1, stagger: .12 }, '-=1')
-      .to('.cloche', { y: 0, opacity: 1, scale: 1, duration: 1.8 }, '-=1.2')
+      .to('.hero__media', { scale: 1, duration: 2.6, ease: 'expo.out' }, 0)
+      .to(heroChars, { yPercent: 0, rotate: 0, opacity: 1, stagger: .05, duration: 1.4 }, .15)
+      .to('[data-hero-fade]', { y: 0, opacity: 1, stagger: .14 }, '-=1')
       .to('.nav__inner', { y: 0, opacity: 1, duration: 1, clearProps: 'transform' }, '-=1.4');
   }
 
@@ -293,29 +297,26 @@
     });
   });
 
-  /* ---------- Hero : la cloche se soulève au scroll ---------- */
+  /* ---------- Hero : la photo s'éloigne au scroll ---------- */
   const heroTl = gsap.timeline({
     scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom top', scrub: 1 },
     defaults: { ease: 'none', duration: 1 },
   });
   heroTl
-    .to('.cloche__dome', { yPercent: -95, rotate: -7, xPercent: 6 }, 0)
-    .to('.cloche__treasure', { y: -40, scale: 1.25 }, 0)
-    .to('.cloche .flare', { scale: 1.8 }, 0)
-    .to('.cloche .flare__core', { opacity: 1 }, 0)
+    .to('.hero__media img', { yPercent: 16, scale: 1.18 }, 0)
     .to('.hero__copy', { yPercent: -40, opacity: 0 }, 0)
     .to('.hero__dust', { opacity: .3 }, 0);
 
   // Parallaxe à la souris dans le hero
   if (finePointer) {
     const hero = $('.hero');
-    const rotY = gsap.quickTo('.cloche', 'rotationY', { duration: 1.2, ease: 'power3' });
-    const rotX = gsap.quickTo('.cloche', 'rotationX', { duration: 1.2, ease: 'power3' });
+    const rotY = gsap.quickTo('.hero__media img', 'x', { duration: 1.4, ease: 'power3' });
+    const rotX = gsap.quickTo('.hero__media img', 'y', { duration: 1.4, ease: 'power3' });
     const tx = gsap.quickTo('.hero__copy', 'x', { duration: 1.6, ease: 'power3' });
     hero.addEventListener('mousemove', (e) => {
       const nx = e.clientX / window.innerWidth - .5;
       const ny = e.clientY / window.innerHeight - .5;
-      rotY(nx * 16); rotX(-ny * 8); tx(nx * -24);
+      rotY(nx * -30); rotX(ny * -20); tx(nx * -24);
     });
     hero.addEventListener('mouseleave', () => { rotY(0); rotX(0); tx(0); });
   }
@@ -380,7 +381,7 @@
     });
   });
 
-  /* ---------- Parallaxe des sculptures ---------- */
+  /* ---------- Parallaxe des photographies ---------- */
   $$('[data-speed]').forEach((el) => {
     const speed = parseFloat(el.dataset.speed);
     gsap.to(el, {
@@ -388,9 +389,26 @@
       scrollTrigger: { trigger: el.closest('section'), start: 'top bottom', end: 'bottom top', scrub: true, invalidateOnRefresh: true },
     });
   });
-  gsap.from('.constellation > .orb', {
-    scale: 0, stagger: .12, duration: 1.6, ease: 'elastic.out(1, .6)',
-    scrollTrigger: { trigger: '.constellation', start: 'top 75%' },
+  // Photos dévoilées comme un rideau qui se lève
+  $$('[data-img-reveal]').forEach((img) => {
+    const frame = img.parentElement;
+    gsap.fromTo(frame, { clipPath: 'inset(100% 0% 0% 0%)' }, {
+      clipPath: 'inset(0% 0% 0% 0%)', duration: 1.6, ease: 'expo.inOut',
+      scrollTrigger: { trigger: frame, start: 'top 85%' },
+    });
+    gsap.from(img, { scale: 1.35, duration: 2.2, ease: 'expo.out', scrollTrigger: { trigger: frame, start: 'top 85%' } });
+  });
+  gsap.from('.collage__round', {
+    scale: 0, rotate: -40, duration: 1.8, ease: 'back.out(1.4)',
+    scrollTrigger: { trigger: '.collage', start: 'top 60%' },
+  });
+
+  // Assiettes qui tournent doucement au scroll
+  $$('[data-spin]').forEach((plate, i) => {
+    gsap.fromTo(plate, { rotate: i % 2 ? 40 : -40, scale: .85 }, {
+      rotate: i % 2 ? -40 : 40, scale: 1, ease: 'none',
+      scrollTrigger: { trigger: plate, start: 'top bottom', end: 'bottom top', scrub: 1 },
+    });
   });
 
   /* ---------- Cartes : entrée + inclinaison 3D ---------- */
@@ -398,9 +416,13 @@
     y: 120, opacity: 0, rotateX: -12, transformOrigin: '50% 0%', stagger: .12, duration: 1.4,
     scrollTrigger: { trigger: '.cards', start: 'top 80%' },
   });
-  gsap.from('.card__art', {
-    scale: .6, opacity: 0, rotate: -20, stagger: .12, duration: 1.8,
-    scrollTrigger: { trigger: '.cards', start: 'top 70%' },
+  gsap.from('.card__media img', {
+    scale: 1.4, stagger: .12, duration: 2,
+    scrollTrigger: { trigger: '.cards', start: 'top 75%' },
+  });
+  gsap.from('.formule', {
+    y: 120, opacity: 0, rotateX: -10, transformOrigin: '50% 0%', stagger: .15, duration: 1.4,
+    scrollTrigger: { trigger: '.formules__grid', start: 'top 80%' },
   });
 
   if (finePointer) {
@@ -437,11 +459,11 @@
       scaleX: 1, ease: 'none',
       scrollTrigger: { trigger: '.steps', start: 'top top', end: () => '+=' + distance(), scrub: true, invalidateOnRefresh: true },
     });
-    $$('.step__orb').forEach((orb) => {
-      const step = orb.closest('.step');
-      gsap.from(orb, {
-        rotate: -90, scale: .3, ease: 'none',
-        scrollTrigger: { trigger: step, containerAnimation: tween, start: 'left 100%', end: 'left 40%', scrub: true },
+    $$('.step__media img').forEach((img) => {
+      const step = img.closest('.step');
+      gsap.fromTo(img, { xPercent: -10 }, {
+        xPercent: 10, ease: 'none',
+        scrollTrigger: { trigger: step, containerAnimation: tween, start: 'left right', end: 'right left', scrub: true },
       });
     });
   });
@@ -463,11 +485,12 @@
     });
   });
 
-  /* ---------- La carte : sculpture qui suit le curseur ---------- */
+  /* ---------- Le dîner : photo du plat qui suit le curseur ---------- */
   const float = $('.menu-float');
   const list = $('[data-menu-list]');
   if (float && list && finePointer) {
-    const orb = $('.orb', float);
+    const photo = $('img', float);
+    $$('.menu-item', list).forEach((item) => { const pre = new Image(); pre.src = item.dataset.img; });
     const fx = gsap.quickTo(float, 'x', { duration: .7, ease: 'power3' });
     const fy = gsap.quickTo(float, 'y', { duration: .7, ease: 'power3' });
     gsap.set(float, { x: window.innerWidth / 2, y: window.innerHeight / 2 });
@@ -475,7 +498,11 @@
     list.addEventListener('mouseenter', () => float.classList.add('is-visible'));
     list.addEventListener('mouseleave', () => float.classList.remove('is-visible'));
     $$('.menu-item', list).forEach((item) => {
-      item.addEventListener('mouseenter', () => { orb.style.setProperty('--hue', item.dataset.hue + 'deg'); });
+      item.addEventListener('mouseenter', () => {
+        if (photo.getAttribute('src') === item.dataset.img) return;
+        photo.src = item.dataset.img;
+        gsap.fromTo(photo, { clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0% 0)', duration: .7, ease: 'expo.out' });
+      });
     });
   }
   gsap.from('.menu-item', {
@@ -573,7 +600,7 @@
         r: Math.random() * 1.6 + .3,
         vy: -(Math.random() * .25 + .05), vx: (Math.random() - .5) * .15,
         a: Math.random() * .6 + .2, t: Math.random() * Math.PI * 2,
-        hue: Math.random() < .7 ? 40 : 260,
+        hue: 32 + Math.random() * 16,
       }));
     };
     resize();
