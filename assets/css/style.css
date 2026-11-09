@@ -1136,3 +1136,18 @@ a.step:hover .subheading { color: var(--sand); }
 }
 .request .choice input:checked + span { background: var(--stone); border-color: var(--stone); }
 .contact--page { overflow: visible; }
+
+/* Chiffres clés */
+.stats { display: block; }
+.stats__title { margin: 0 0 24px; font-family: var(--font-sans); font-size: 10.5px; letter-spacing: .3em; text-transform: uppercase; color: var(--stone); }
+.stats__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin: 0; }
+.stat dt { margin: 0 0 10px; display: flex; flex-direction: column; gap: 6px; font-family: inherit; font-size: inherit; letter-spacing: 0; text-transform: none; }
+.stat__num { font-family: var(--font-serif); font-weight: 300; font-size: clamp(44px, 5vw, 64px); line-height: 1; color: var(--stone); font-variant-numeric: lining-nums tabular-nums; }
+.stat__unit { font-family: var(--font-sans); font-size: 10px; letter-spacing: .26em; text-transform: uppercase; color: var(--stone); }
+.stat dd { margin: 0; font-family: var(--font-serif); font-style: italic; font-weight: 400; font-size: 16px; line-height: 1.45; color: var(--ink); }
+@media (max-width: 560px) {
+  .stats__grid { gap: 14px; }
+  .stat__num { font-size: 38px; }
+  .stat__unit { font-size: 9px; letter-spacing: .16em; }
+  .stat dd { font-size: 14px; }
+}
